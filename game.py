@@ -1,3 +1,6 @@
+import random
+
+
 NUM_OF_COL = 7
 NUM_OF_ROW = 6
 
@@ -7,7 +10,7 @@ PLAYER_2 = 2
 GAME_STATUS_WIN = 1
 GAME_STATUS_DRAW = -1
 GAME_INCOMPLETE = 0
-
+INVALID_MOVE = 2
 COUNT_TO_WIN = 4
 
 class ConnectFour(object):
@@ -26,6 +29,7 @@ class ConnectFour(object):
         row_index = self.play(player, col_index)
         if row_index == -1:
             print("Invalid Move")
+            return INVALID_MOVE
 
         game_status = self.check_game_status(player, row_index, col_index)
         print('Current Board:')
@@ -34,6 +38,7 @@ class ConnectFour(object):
             print('Game won by Player {}'.format(player))
         elif game_status == GAME_STATUS_DRAW:
             print('Game is draw')
+        return game_status
 
     def play(self, player, col_index):
         if not self.is_move_possible(col_index):
@@ -83,6 +88,7 @@ class ConnectFour(object):
                     return False
         return True
 
+    # Checking game win condition usin DP
     def check_count(self, player, row_index, col_index, row_direction, col_direction):
         if row_index < 0 or row_index >= self.num_of_row:
             return 0
@@ -100,7 +106,6 @@ class ConnectFour(object):
         else:
             return 0
         
-
     def row_win(self, player, row_index, col_index, recursion=0):
         count = 1 + self.check_count(
             player, 
@@ -115,7 +120,7 @@ class ConnectFour(object):
                 row_direction=0,
                 col_direction=1
             )
-        if count >= 4:
+        if count >= self.count_to_win:
             return True
         return False
 
@@ -133,7 +138,7 @@ class ConnectFour(object):
                 row_direction=1,
                 col_direction=0
             )
-        if count >= 4:
+        if count >= self.count_to_win:
             return True
         return False
 
@@ -151,7 +156,7 @@ class ConnectFour(object):
                 row_direction=1,
                 col_direction=1
             )
-        if count >= 4:
+        if count >= self.count_to_win:
             return True
         return False
 
@@ -169,7 +174,7 @@ class ConnectFour(object):
                 row_direction=-1,
                 col_direction=1
             )
-        if count >= 4:
+        if count >= self.count_to_win:
             return True
         return False
 
@@ -196,5 +201,30 @@ def play_game():
     connect_four.move(PLAYER_1, 5)
     connect_four.move(PLAYER_2, 5)
 
+def play_game_random():
+    # Both player will try random move until it fins a valid movement. 
+    connect_four = ConnectFour()
+    continue_play = True
+    turn = PLAYER_1
+    while continue_play:
+        status = connect_four.move(turn, get_random_move())
+        if status != INVALID_MOVE:
+            turn = get_next_player(turn)
+        if status in [GAME_STATUS_WIN, GAME_STATUS_DRAW]:
+            continue_play = False
+
+def get_next_player(current_turn):
+    if current_turn == PLAYER_1:
+        return PLAYER_2
+    else:
+        return PLAYER_1
+
+def get_random_move():
+    return random.randint(1, 7)
+
 if __name__ == '__main__':
-    play_game()
+    # print('Playing regular game')
+    # play_game()
+    print('Playing random game by both player')
+    play_game_random()
+
